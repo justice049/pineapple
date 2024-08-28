@@ -7,6 +7,7 @@
 #include<sys/wait.h>
 #include<ctype.h>
 #include<fcntl.h>
+
 #define SIZE 512
 #define ZERO '\0'
 #define SEP " "
