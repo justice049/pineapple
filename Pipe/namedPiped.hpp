@@ -71,7 +71,7 @@ public:
     }
     int WriteNamedPipe(const std::string &in)
     {
-        write(_fd,in.c_str(),in.size());
+        return write(_fd,in.c_str(),in.size());
         
     }
     ~NamePiped()

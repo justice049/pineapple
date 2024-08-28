@@ -11,7 +11,17 @@ int main()
             int n = fifo.ReadNamedPipe(&message);
             if(n > 0)
             {
-                std::cout << "Client Say> " << message << std::endl;
+                std::cout << "Client Say " << message << std::endl;
+            }
+            else if(n == 0)
+            {
+                std::cout << "Client quit, Server Too!" << std::endl;
+                break;
+            }
+            else
+            {
+                std::cout << "fifo.ReadNamePipe Error" << std::endl;
+                break;
             }
         }
     }
