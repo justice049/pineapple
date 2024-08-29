@@ -2,11 +2,7 @@
 
 int main()
 {
-    key_t key = GetCommKey(pathname,proj_id);
-    std::cout << "key:" << ToHex(key) << std::endl;
-
-    int shmid = ShmGet(key,4096);
-    std::cout << "shmid:" << shmid << std::endl;
-
+    //又是一天，什么都没有改变
+    Shm shm(gpathname,gproj_id,gCreater);
     return 0;
 }

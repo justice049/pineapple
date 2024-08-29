@@ -2,7 +2,6 @@
 
 int main()
 {
-    key_t key = GetCommKey(pathname,proj_id);
-    std::cout << "key:" << ToHex(key) << std::endl;
+    Shm shm(gpathname,gproj_id,gUser);
     return 0;
 }
