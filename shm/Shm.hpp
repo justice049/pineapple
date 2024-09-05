@@ -28,15 +28,15 @@ key_t GetCommKey()
      return k;
 }
 //创建共享内存
-int ShmGet(key_t key,int size,int flag)
-{
-    int shmid = shmget(key,size,flag);
-    if(shmid < 0)
-    {
-        perror("shmget");
-    }
-    return shmid;
-}
+// int ShmGet(key_t key,int size,int flag)
+// {
+//     int shmid = shmget(key,size,flag);
+//     if(shmid < 0)
+//     {
+//         perror("shmget");
+//     }
+//     return shmid;
+// }
 std::string RoleToString(int who)
 {
     if(who == gCreater)
@@ -54,11 +54,12 @@ std::string RoleToString(int who)
 }
 public:
     Shm(const std::string &pathname, int proj_id,int who)
-    :_pathname(pathname),_proj_id(proj_id),_who(who)
+    :_pathname(pathname),_proj_id(proj_id),_who(who),_addrshm(nullptr)
     {
         _key = GetCommKey();
         if(_who == gCreater) GetShmUserCreate();
         else if(_who == gUser) GetShmForUse();
+        _addrshm = AttachShm();
     }
     ~Shm()
     {
@@ -80,11 +81,12 @@ bool GetShmUserCreate()
 {
     if(_who == gCreater)
     {
-        _shmid = ShmGet(_key,gShmSize,IPC_CREAT | IPC_EXCL | 0666);
+        _shmid = shmget(_key,gShmSize,IPC_CREAT | IPC_EXCL | 0666);
         if(_shmid >= 0)
         {
             return true;
         }
+        std::cout << "shm create done..." << std::endl;
     }
     return false;
 }
@@ -92,7 +94,7 @@ bool GetShmForUse()
 {
     if(_who == gUser)
     {
-        _shmid = ShmGet(_key,gShmSize,IPC_CREAT);
+        _shmid = shmget(_key,gShmSize,IPC_CREAT);
         if(_shmid >= 0)
         {
             return true;
@@ -102,6 +104,10 @@ bool GetShmForUse()
 }
 void *AttachShm()
 {
+    if(_addrshm != nullptr)
+    {
+         DetachShm(_addrshm);
+    }
     void *shmaddr = shmat(_shmid,nullptr,0);
     if(shmaddr == nullptr)
     {
@@ -127,7 +133,7 @@ private:
     std::string _pathname;
     int _proj_id;
     int _who;
-    void *addrshm
+    void *_addrshm;
 };
 
 #endif 
