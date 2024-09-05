@@ -37,6 +37,21 @@ int ShmGet(key_t key,int size,int flag)
     }
     return shmid;
 }
+std::string RoleToString(int who)
+{
+    if(who == gCreater)
+    {
+        return "Creater";
+    }
+    else if(who == gUser)
+    {
+        return "User";
+    }
+    else
+    {
+        return "None";
+    }
+}
 public:
     Shm(const std::string &pathname, int proj_id,int who)
     :_pathname(pathname),_proj_id(proj_id),_who(who)
@@ -65,7 +80,7 @@ bool GetShmUserCreate()
 {
     if(_who == gCreater)
     {
-        _shmid = ShmGet(_key,gShmSize,IPC_CREAT | IPC_EXCL);
+        _shmid = ShmGet(_key,gShmSize,IPC_CREAT | IPC_EXCL | 0666);
         if(_shmid >= 0)
         {
             return true;
@@ -85,6 +100,16 @@ bool GetShmForUse()
     }
     return false;
 }
+void *AttachShm()
+{
+    void *shmaddr = shmat(_shmid,nullptr,0);
+    if(shmaddr == nullptr)
+    {
+        perror("shmat");
+    }
+    std::cout << "AttachShm " << RoleToString(_who) << std::endl;
+    return shmaddr;
+}
 
 private:
     key_t _key;
@@ -93,14 +118,5 @@ private:
     int _proj_id;
     int _who;
 };
-
-
-
-
-
-
-
-
-
 
 #endif 
