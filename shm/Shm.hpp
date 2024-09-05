@@ -6,6 +6,7 @@
 #include<sys/ipc.h>
 #include<cerrno>
 #include<cstdio>
+#include<cstring>
 #include<string>
 #include<unistd.h>
 
@@ -81,7 +82,17 @@ bool GetShmUserCreate()
 {
     if(_who == gCreater)
     {
-        _shmid = shmget(_key,gShmSize,IPC_CREAT | IPC_EXCL | 0666);
+        _shmid = shmget(_key,gShmSize,IPC_CREAT | 0666);   //不用IPC_EXCL,避免在已经存在的时候出错
+        //调试代码，我看看权限是什么，会不会是显示的问题
+        struct shmid_ds shm_info;
+        if (shmctl(_shmid, IPC_STAT, &shm_info) == -1) 
+        {
+            perror("shmctl IPC_STAT");
+        } 
+        else 
+        {
+            std::cout << "Created Shm Permissions: " << std::oct << shm_info.shm_perm.mode << std::endl;
+        }
         if(_shmid >= 0)
         {
             return true;
@@ -94,7 +105,19 @@ bool GetShmForUse()
 {
     if(_who == gUser)
     {
-        _shmid = shmget(_key,gShmSize,IPC_CREAT);
+        _shmid = shmget(_key,gShmSize,IPC_CREAT | 0666);    //哈哈，真是令人忍俊不禁
+        struct shmid_ds shm_info;
+        
+        //调试代码，我看看权限是什么，会不会是显示的问题
+        if (shmctl(_shmid, IPC_STAT, &shm_info) == -1) 
+        {
+            perror("shmctl IPC_STAT");
+        } 
+        else 
+        {
+            std::cout << "Created Shm Permissions: " << std::oct << shm_info.shm_perm.mode << std::endl;
+        }
+        
         if(_shmid >= 0)
         {
             return true;
@@ -102,14 +125,32 @@ bool GetShmForUse()
     }
     return false;
 }
+
+// // 更改共享内存权限，我先注释掉
+// void SetShmPermissions(int shmid, mode_t perms)
+// {
+//     struct shmid_ds shm_info;
+//     if (shmctl(shmid, IPC_STAT, &shm_info) == -1)
+//     {
+//         perror("shmctl IPC_STAT");
+//         return;
+//     }
+
+//     shm_info.shm_perm.mode = perms;
+//     if (shmctl(shmid, IPC_SET, &shm_info) == -1)
+//     {
+//         perror("shmctl IPC_SET");
+//     }
+// }
+
 void *AttachShm()
 {
     if(_addrshm != nullptr)
     {
          DetachShm(_addrshm);
     }
-    void *shmaddr = shmat(_shmid,nullptr,0);
-    if(shmaddr == nullptr)
+    void *shmaddr = shmat(_shmid,nullptr,0);  
+    if(shmaddr == (void*)-1)
     {
         perror("shmat");
     }
@@ -126,6 +167,20 @@ void DetachShm(void *shmaddr)
     shmdt(shmaddr);
     std::cout << "DetachShm " << RoleToString(_who) << std::endl;
 }
+
+void Zero()
+{
+    if(_addrshm)
+    {
+        memset(_addrshm,0,gShmSize);
+    }
+}
+
+void *Addr()
+{
+    return _addrshm;
+}
+
 
 private:
     key_t _key;
