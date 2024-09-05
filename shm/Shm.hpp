@@ -111,12 +111,23 @@ void *AttachShm()
     return shmaddr;
 }
 
+void DetachShm(void *shmaddr)
+{
+    if(shmaddr == nullptr)
+    {
+        return;
+    }
+    shmdt(shmaddr);
+    std::cout << "DetachShm " << RoleToString(_who) << std::endl;
+}
+
 private:
     key_t _key;
     int _shmid;
     std::string _pathname;
     int _proj_id;
     int _who;
+    void *addrshm
 };
 
 #endif 
