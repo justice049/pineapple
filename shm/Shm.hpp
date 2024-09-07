@@ -72,7 +72,7 @@ public:
     }
 
 //转十六进制捏
-std::string ToHex()
+std::string ToHex(int x)
 {
     char buffer[128];
     snprintf(buffer,sizeof(buffer),"0x%x",_key);
@@ -181,6 +181,17 @@ void *Addr()
     return _addrshm;
 }
 
+void DebugShm()
+{
+    struct  shmid_ds ds;
+    int n = shmctl(_shmid,IPC_STAT,&ds);
+    if(n < 0)
+    {
+        return;
+    }
+    std::cout << "ds.shm_perm.__key: " << ToHex(ds.shm_perm.__key) << std::endl;
+    std::cout << "ds.shm_nattch: " << ds.shm_nattch << std::endl;
+}
 
 private:
     key_t _key;

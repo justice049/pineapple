@@ -12,7 +12,7 @@ int main()
     NamePiped fifo(comm_path,Creater);
     fifo.OpenForRead();
 
-    
+    shm.DebugShm();
 
     while (true)
     {
