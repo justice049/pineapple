@@ -4,25 +4,72 @@
 #include<sys/types.h>
 #include<unistd.h>
 
+int cnt = 1;
+
 void hander(int sig)
 {
-    std::cout << "get a sig" << sig <<std::endl;
+    std::cout << "get a sig: " << sig << std::endl;
     exit(1);
 }
 
 int main()
 {
-    int cnt = 1;
-
-    signal(SIGALRM,hander);
-    alarm(1);       //设置一秒后的闹钟
+    signal(SIGSEGV,hander);
+    // int a = 10;
+    // a /= 0;
+    int *p = nullptr;
+    *p = 100;
+    int cnt = 0;
     while (true)
     {
-        std::cout << "cnt: " << cnt << std::endl;
         cnt++;
+        std::cout << "hello world" << std::endl;
     }
+    
     return 0;
 }
+
+
+// int cnt = 1;
+
+// void hander(int sig)
+// {
+//     std::cout << "cnt: " << cnt << "get a sig: " << sig << std::endl;
+//     exit(1);
+// }
+
+// int main()
+// {
+//     signal(SIGALRM,hander);
+//     alarm(1);       
+//     while (true)
+//     {
+//         cnt++;
+//     }
+//     return 0;
+// }
+
+
+
+// void hander(int sig)
+// {
+//     std::cout << "get a sig" << sig <<std::endl;
+//     exit(1);
+// }
+
+// int main()
+// {
+//     int cnt = 1;
+
+//     signal(SIGALRM,hander);
+//     alarm(1);       //设置一秒后的闹钟
+//     while (true)
+//     {
+//         std::cout << "cnt: " << cnt << std::endl;
+//         cnt++;
+//     }
+//     return 0;
+// }
 
 
 // void hander(int sig)
