@@ -15,7 +15,7 @@ int main()
 	pf1->f2();
  
 	F1* pf2 = nullptr;
-	pf2->f2();
+	pf2f2(->);
  
 	return 0;
 }
