@@ -6,21 +6,33 @@
 
 namespace ThreadMoudle
 {
+    class ThreadData
+    {
+    public:
+        ThreadData(const std::string &name,pthread_mutex_t *lock):_name(name),_lock(lock)
+        {
+
+        }
+    public:         //正常来说应该是私有但是我不想写接口了凑合看吧
+        std::string _name;
+        pthread_mutex_t *_lock;
+    };
+    
     // 线程要执行的方法
     // using func_t = std::function<void()>;
-    typedef void (*func_t)(const std::string &name); // 函数指针类型
+    typedef void (*func_t)(ThreadData *td); // 函数指针类型
     class Thread
     {
     public:
         void Excute()
         {
             _isrunning = true;
-            _func(_name);
+            _func(_td);
             _isrunning = false;
         }
 
     public:
-        Thread(const std::string &name, func_t func) : _name(name), _func(func)
+        Thread(const std::string &name, func_t func, ThreadData *td) : _name(name), _func(func),_td(td)
         {
         }
         static void *ThreadRoutine(void *args) // 新线程执行的方法
@@ -74,6 +86,7 @@ namespace ThreadMoudle
         bool _isrunning;
         func_t _func; // 线程要执行的回调函数
 
+        ThreadData* _td;
         // std::string _result;        //返回值，不关心的话也可以不用写
     };
 }
