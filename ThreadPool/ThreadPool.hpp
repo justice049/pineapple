@@ -21,7 +21,10 @@ public:
     }
     void Init()
     {
-        
+        for(int i=0;i<_thread_num;i++)
+        {
+            std::string threadname = "thread-" + std::to_string()
+        }
     }
     void Start()
     {

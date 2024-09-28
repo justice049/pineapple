@@ -19,26 +19,27 @@ namespace ThreadMoudle
     };
 
     // 线程要执行的方法
-    // using func_t = std::function<void()>;
-    typedef void (*func_t)(ThreadData *td); // 函数指针类型
+    using func_t = std::function<void()>;       //返回值是void，参数是空
+    //typedef void (*func_t)(ThreadData *td); // 函数指针类型
     class Thread
     {
     public:
         void Excute()
         {
             _isrunning = true;
-            _func(_td);
+            _func();
             _isrunning = false;
         }
-
     public:
         Thread(const std::string &name, func_t func, ThreadData *td) : _name(name), _func(func), _td(td)
         {
+            std::cout<<"create"<<name<<"done"<<std::endl;
         }
         static void *ThreadRoutine(void *args) // 新线程执行的方法
         {
             Thread *self = static_cast<Thread *>(args); // 获得当前对象
             self->Excute();
+            return nullptr;
         }
         bool Start()
         {
@@ -86,7 +87,7 @@ namespace ThreadMoudle
         bool _isrunning;
         func_t _func; // 线程要执行的回调函数
 
-        ThreadData *_td;
+        //ThreadData *_td;
         // std::string _result;        //返回值，不关心的话也可以不用写
     };
 }
