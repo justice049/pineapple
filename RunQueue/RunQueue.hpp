@@ -29,8 +29,8 @@ public:
         P(_space_sem);
         _ringqueue[_p_step]=in;
         _p_step++;
-        _p_step%=_max_cpp;  //因为是环形队列
-        V(_data_sem);    //完成生产要释放资源
+        _p_step%=_max_cpp;      //因为是环形队列
+        V(_data_sem);           //完成生产要释放资源
     }
     void Pop(T* out)            //消费者
     {
@@ -38,7 +38,7 @@ public:
         *out = _ringqueue[_c_step];
         _c_step++;
         _c_step%=_max_cpp;
-        V(_data_sem);
+        V(_space_sem);
     }
     ~RingQueue()
     {
@@ -52,6 +52,6 @@ private:
     int _c_step;
     int _p_step;
 
-    sem_t _data_sem;    //消费者关心
-    sem_t _space_sem;   //生产者关心
+    sem_t _data_sem;        //消费者关心
+    sem_t _space_sem;       //生产者关心
 };
