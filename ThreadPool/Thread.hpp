@@ -31,7 +31,7 @@ namespace ThreadMoudle
             _isrunning = false;
         }
     public:
-        Thread(const std::string &name, func_t func, ThreadData *td) : _name(name), _func(func), _td(td)
+        Thread(const std::string &name, func_t func) : _name(name), _func(func)
         {
             std::cout<<"create"<<name<<"done"<<std::endl;
         }
