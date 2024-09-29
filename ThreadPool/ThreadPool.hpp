@@ -4,6 +4,7 @@
 #include<unistd.h>
 #include<string>
 #include<vector>
+#include<pthread.h>
 #include<queue>
 #include"Thread.hpp"
 
@@ -38,7 +39,7 @@ private:
     }
     void Sleep()
     {
-        
+        pthread_cond_wait(&_cond,&_mutex);
     }
     void IsEmpty()
     {
@@ -49,11 +50,16 @@ private:
         while (true)
         {
             LockQueue();
-            if(IsEmpty())
+            while(IsEmpty())        //为了防止伪唤醒的情况发生
             {
-
+                Sleep();
             }
+            //有任务
+            T t = _task_queue.front();  //取出
+            _task_queue.pop();  //老的弹出去
             UnLockQueue();
+
+            t();    //处理任务，不能在临界区处理
         }
         
     }
@@ -65,10 +71,11 @@ public:
     }
     void Init()
     {
+        func_t func = std::bind(&ThreadPool::HandlerTask,this);     //让this和handlertask强关联起来，能让一个模块调用另一个类中的方法
         for(int i=0;i<_thread_num;i++)
         {
             std::string threadname = "thread-" + std::to_string(i+1);
-            _threads.emplace_back(threadname,test);
+            _threads.emplace_back(threadname,func);
         }
     }
     void Start()
