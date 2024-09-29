@@ -1,12 +1,13 @@
 #pragma once
 
-#include<iostream>
-#include<unistd.h>
-#include<string>
-#include<vector>
-#include<pthread.h>
-#include<queue>
-#include"Thread.hpp"
+#include <iostream>
+#include <unistd.h>
+#include <functional>
+#include <string>
+#include <vector>
+#include <pthread.h>
+#include <queue>
+#include "Thread.hpp"
 
 using namespace ThreadMoudle;
 
@@ -17,17 +18,17 @@ void test()
     while (true)
     {
         std::cout << "hello EPI?" << std::endl;
-        sleep(1); 
+        sleep(1);
     }
 }
 
-template<typename T>
+template <typename T>
 class ThreadPool
 {
 private:
     void LockQueue()
     {
-        pthraed_mutex_lock(&_mutex);
+        pthread_mutex_lock(&_mutex);
     }
     void UnLockQueue()
     {
@@ -37,11 +38,15 @@ private:
     {
         pthread_cond_signal(&_cond);
     }
+    void WakeUpAll()
+    {
+        pthraed_cond_broadcast(&_cond);
+    }
     void Sleep()
     {
-        pthread_cond_wait(&_cond,&_mutex);
+        pthread_cond_wait(&_cond, &_mutex);
     }
-    void IsEmpty()
+    bool IsEmpty()
     {
         return _task_queue.empty();
     }
@@ -50,69 +55,87 @@ private:
         while (true)
         {
             LockQueue();
-            while(IsEmpty())        //为了防止伪唤醒的情况发生
+            while (IsEmpty() && _isrunning) // 为了防止伪唤醒的情况发生
             {
+                _sleep_thread_num++; // 保证加锁和解锁都安全更新
                 Sleep();
+                _sleep_thread_num--;
             }
-            //有任务
-            T t = _task_queue.front();  //取出
-            _task_queue.pop();  //老的弹出去
+            // 判定一种情况
+            if (IsEmpty() && !_isrunning) // 空了并且退出那就退罢
+            {
+                std::cout << name << "quit" << std::endl;
+                UnLockQueue();
+                break;
+            }
+            // 有任务
+            T t = _task_queue.front(); // 取出
+            _task_queue.pop();         // 老的弹出去
             UnLockQueue();
 
-            t();    //处理任务，不能在临界区处理
+            t(); // 处理任务，不能在临界区处理
+            std::cout << t.debug() << std::endl;
         }
-        
     }
+
 public:
-    ThreadPool(int thraed_num = gdefaultnum):_thread_num(thraed_num),_isrunning(false),_sleep_thread_num(0)
+    ThreadPool(int thraed_num = gdefaultnum) : _thread_num(thraed_num), _isrunning(false), _sleep_thread_num(0)
     {
-        pthread_mutex_init(&_mutex);
-        pthread_cond_init(&_cond);
+        pthread_mutex_init(&_mutex, nullptr);
+        pthread_cond_init(&_cond, nullptr);
     }
     void Init()
     {
-        func_t func = std::bind(&ThreadPool::HandlerTask,this);     //让this和handlertask强关联起来，能让一个模块调用另一个类中的方法
-        for(int i=0;i<_thread_num;i++)
+        func_t func = std::bind(&ThreadPool::HandlerTask, this); // 让this和handlertask强关联起来，能让一个模块调用另一个类中的方法
+        for (int i = 0; i < _thread_num; i++)
         {
-            std::string threadname = "thread-" + std::to_string(i+1);
-            _threads.emplace_back(threadname,func);
+            std::string threadname = "thread-" + std::to_string(i + 1);
+            _threads.emplace_back(threadname, func);
         }
     }
     void Start()
     {
-        for(auto &thread:_threads)
+        _isrunning = true;
+        for (auto &thread : _threads)
         {
             thread.Start();
         }
     }
     void Stop()
     {
-
+        LockQueue();
+        _isrunning = false;
+        WakeUpAll();
+        UnLockQueue();
     }
     void Enqueue(const T &in)
     {
-        LockQueue();        //加锁
-        _task_queue.push(in);
-        if(_sleep_thread_num > 0)
+        LockQueue(); // 加锁
+        if (_isrunning)
         {
-            WakeUp();
+            _task_queue.push(in);
+
+            if (_sleep_thread_num > 0)
+            {
+                WakeUp();
+            }
         }
-        UnLockQueue();      //解锁
+        UnLockQueue(); // 解锁
     }
     ~ThreadPool()
     {
         pthread_mutex_destroy(&_mutex);
         pthread_cond_destroy(&_cond);
     }
+
 private:
     int _thread_num;
     std::vector<Thread> _threads;
     std::queue<T> _task_queue;
     bool _isrunning;
 
-    int _sleep_thread_num;      //我们定义一个计数器来确定什么时候唤醒它
+    int _sleep_thread_num; // 我们定义一个计数器来确定什么时候唤醒它
 
     pthread_mutex_t _mutex;
-    pthread_mutex_t _cond;
+    pthread_cond_t _cond;
 };
-
