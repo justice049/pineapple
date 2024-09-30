@@ -40,7 +40,7 @@ private:
     }
     void WakeUpAll()
     {
-        pthraed_cond_broadcast(&_cond);
+        pthread_cond_broadcast(&_cond);
     }
     void Sleep()
     {
@@ -64,7 +64,7 @@ private:
             // 判定一种情况
             if (IsEmpty() && !_isrunning) // 空了并且退出那就退罢
             {
-                std::cout << name << "quit" << std::endl;
+                std::cout << "quit" << std::endl;
                 UnLockQueue();
                 break;
             }
