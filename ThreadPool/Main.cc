@@ -4,9 +4,10 @@
 
 int main()
 {
-    std::cout << GetCurTime() << std::endl;
-    Log lg;
-    lg.LogMessage("main.cc",10,DEBUG,"hello %d,world: %c,hello: %f\n",1000,'A',3.14);
+    // Log lg;
+    // lg.Enable(FILE_TYPE);
+    LOG(__FILE__,__LINE__,DEBUG,"hello %d,world: %c,hello: %f\n",1000,'A',3.14);
+    sleep(1);
     return 0;
 }
 
