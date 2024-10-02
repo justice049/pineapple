@@ -2,14 +2,36 @@
 #include"Task.hpp"
 #include"Log.hpp"
 
+#define LOG(Level, Format, ...) do { \
+    lg.LogMessage(__FILE__, __LINE__, Level, Format, ##__VA_ARGS__); \
+} while(0)
+
 int main()
 {
-    // Log lg;
-    // lg.Enable(FILE_TYPE);
-    LOG(__FILE__,__LINE__,DEBUG,"hello %d,world: %c,hello: %f\n",1000,'A',3.14);
-    sleep(1);
+    Log::FlushLogToScreen();
+    int cnt = 10;
+    while (cnt)
+    {
+        sleep(1);
+        Task t(1,1);
+        ThreadPool<Task>::GetInstance()->Enqueue(t);
+        LOG(INFO,"enqueue a task,%s\n",t.debug().c_str());
+        sleep(1);
+        cnt--;
+    }
+    ThreadPool<Task>::GetInstance()->Stop();
+    LOG(INFO,"thraed pool stop!\n");
     return 0;
 }
+
+// int main()
+// {
+//     // Log lg;
+//     // lg.Enable(FILE_TYPE);
+//     LOG(DEBUG,"hello %d,world: %c,hello: %f\n",1000,'A',3.14);
+//     sleep(1);
+//     return 0;
+// }
 
 // int main()
 // {

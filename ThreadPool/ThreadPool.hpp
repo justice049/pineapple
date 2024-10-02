@@ -1,5 +1,6 @@
 #pragma once
 
+#include"Log.hpp"
 #include <iostream>
 #include <unistd.h>
 #include <functional>
@@ -8,6 +9,10 @@
 #include <pthread.h>
 #include <queue>
 #include "Thread.hpp"
+
+#define LOG(Level, Format, ...) do { \
+    lg.LogMessage(__FILE__, __LINE__, Level, Format, ##__VA_ARGS__); \
+} while(0)
 
 using namespace ThreadMoudle;
 
@@ -78,12 +83,14 @@ private:
         }
     }
 
-public:
-    ThreadPool(int thraed_num = gdefaultnum) : _thread_num(thraed_num), _isrunning(false), _sleep_thread_num(0)
+    ThreadPool(int thread_num = gdefaultnum) : _thread_num(thread_num), _isrunning(false), _sleep_thread_num(0)
     {
         pthread_mutex_init(&_mutex, nullptr);
         pthread_cond_init(&_cond, nullptr);
     }
+    ThreadPool(const ThreadPool<T> &) = delete;         //赫赫这就是我们单例模式
+    void operator = (const ThreadPool<T> &) = delete;
+public:
     void Init()
     {
         func_t func = std::bind(&ThreadPool::HandlerTask, this); // 让this和handlertask强关联起来，能让一个模块调用另一个类中的方法
@@ -107,6 +114,21 @@ public:
         _isrunning = false;
         WakeUpAll();
         UnLockQueue();
+    }
+    static ThreadPool<T> *GetInstance()
+    {
+        if(_tp==nullptr)
+        {
+            LOG(INFO,"create threadpool\n");
+            _tp=new ThreadPool();
+            _tp->Init();
+            _tp->Start();
+        }
+        else
+        {
+            LOG(INFO,"get threadpool\n");
+        }
+        return _tp;
     }
     void Enqueue(const T &in)
     {
@@ -138,4 +160,12 @@ private:
 
     pthread_mutex_t _mutex;
     pthread_cond_t _cond;
+
+    //单例模式
+    static ThreadPool<T> *_tp;
+    
 };
+
+//静态指针的初始化需要在类外
+template<typename T>
+ThreadPool<T> *ThreadPool<T>::_tp = nullptr;
