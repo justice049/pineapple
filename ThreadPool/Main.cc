@@ -2,11 +2,6 @@
 #include"Task.hpp"
 #include"Log.hpp"
 
-Log lg;
-#define LOG(Level, Format, ...) do { \
-    lg.LogMessage(__FILE__, __LINE__, Level, Format, ##__VA_ARGS__); \
-} while(0)
-
 int main()
 {
     Log::FlushLogToScreen();
