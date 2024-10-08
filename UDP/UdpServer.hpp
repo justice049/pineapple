@@ -10,6 +10,13 @@
 static const int gsockfd = -1; 
 
 //让我们来枚举一些常量罢
+enum
+{
+    SOCKET_ERROR = 1
+    
+
+};
+
 
 class UdpServer : public nocopy
 {
@@ -23,7 +30,7 @@ public:
         _sockfd = ::socket(AF_INET,SOCK_DGRAM,0);   //网络套接字，用户，协议类型
         if(_sockfd<0)
         {
-            exit();
+            exit(SOCKET_ERROR);
         }
     }
     void Start()
