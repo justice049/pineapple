@@ -2,9 +2,9 @@
 all:udpserver udpclient
 
 udpserver:UdpServerMain.cc
-	g++ -o $@ $^ -std=c++11
+	g++ -o $@ $^ -std=c++14
 udpclient:UdpClient.cc
-	g++ -o $@ $^ -std=c++11
+	g++ -o $@ $^ -std=c++14
 
 .PHONY:clean
 clean:

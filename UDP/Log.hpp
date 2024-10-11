@@ -1,13 +1,13 @@
 #pragma
 
 #include <iostream>
-#include<unistd.h>
-#include<sys/types.h>
-#include<ctime>
-#include<stdarg.h>
-#include<fstream>
-#include<cstring>
-#include"LockGuard.hpp"
+#include <unistd.h>
+#include <sys/types.h>
+#include <ctime>
+#include <stdarg.h>
+#include <fstream>
+#include <cstring>
+#include "LockGuard.hpp"
 
 #define SCREEN_TYPE 1
 #define FILE_TYPE 2
@@ -24,133 +24,152 @@ enum
     FATAL
 };
 
-std::string LevelToString(int level)
+namespace log_ns
 {
-    switch (level)
+    std::string LevelToString(int level)
     {
-    case DEBUG:
-        return "DEBUG";
-    case INFO:
-        return "INFO";
-    case WARNING:
-        return "WARNING";
-    case ERRNO:
-        return "ERRNO";
-    case FATAL:
-        return "FATAL";
-    default:
-        return "UNKNOW";
-    }
-}
-
-std::string GetCurTime()
-{
-    time_t now = time(nullptr);
-    struct tm *curr_time = localtime(&now);
-    char buffer[128];
-    snprintf(buffer,sizeof(buffer),"%d-%02d-%02d : %02d-%02d-%02d",\
-    curr_time->tm_year+1900,\
-    curr_time->tm_mon+1,\
-    curr_time->tm_mday,\
-    curr_time->tm_hour,\
-    curr_time->tm_min,\
-    curr_time->tm_sec);
-    return buffer;
-}
-
-class logmessage
-{
-public:
-    std::string _level;
-    pid_t _id;
-    std::string _filename;
-    int _filenumber;
-    std::string _curr_time;
-    std::string _message_info;
-};
-class Log
-{
-public:
-    Log(const std::string &logfile = glogfile):_logfile(logfile),_type(SCREEN_TYPE)
-    {
-
-    }
-    void Enable(int type)
-    {
-        _type = type;
-    }
-    void FlushLogToScreen(const logmessage &lg)
-    {
-        printf("[%s][%d][%s][%d][%s][%s]",
-            lg._level.c_str(),
-            lg._id,
-            lg._filename.c_str(),
-            lg._filenumber,
-            lg._curr_time,
-            lg._message_info
-            );
-    }
-    void FlushLogToFile(const logmessage &lg)
-    {
-        std::ofstream out(_logfile,std::ios::app);
-        if(!out.is_open())
+        switch (level)
         {
-            return;
+        case DEBUG:
+            return "DEBUG";
+        case INFO:
+            return "INFO";
+        case WARNING:
+            return "WARNING";
+        case ERRNO:
+            return "ERRNO";
+        case FATAL:
+            return "FATAL";
+        default:
+            return "UNKNOW";
         }
-        char logtxt[2048];
-        snprintf(logtxt,sizeof(logtxt),"[%s][%d][%s][%d][%s] %s",
-            lg._level.c_str(),
-            lg._id,
-            lg._filename.c_str(),
-            lg._filenumber,
-            lg._curr_time,
-            lg._message_info
-            );
-        out.write(logtxt,strlen(logtxt));
-        out.close();
     }
-    void FlushLog(const logmessage &lg)
-    {
-        //加过滤逻辑，可以把等级过滤出去
-        LockGuard lockguard(&glock);
 
-        switch(_type)
+    logmessage lg;
+
+    std::string GetCurTime()
+    {
+        time_t now = time(nullptr);
+        struct tm *curr_time = localtime(&now);
+        char buffer[128];
+        snprintf(buffer, sizeof(buffer), "%d-%02d-%02d : %02d-%02d-%02d",
+                 curr_time->tm_year + 1900,
+                 curr_time->tm_mon + 1,
+                 curr_time->tm_mday,
+                 curr_time->tm_hour,
+                 curr_time->tm_min,
+                 curr_time->tm_sec);
+        return buffer;
+    }
+
+    class logmessage
+    {
+    public:
+        std::string _level;
+        pid_t _id;
+        std::string _filename;
+        int _filenumber;
+        std::string _curr_time;
+        std::string _message_info;
+    };
+    class Log
+    {
+    public:
+        Log(const std::string &logfile = glogfile) : _logfile(logfile), _type(SCREEN_TYPE)
         {
+        }
+        static void Enable(int type)
+        {
+            lg._type=type;                     //晕晕的，搞不懂,
+        }
+        void FlushLogToScreen(const logmessage &lg)
+        {
+            printf("[%s][%d][%s][%d][%s][%s]",
+                   lg._level.c_str(),
+                   lg._id,
+                   lg._filename.c_str(),
+                   lg._filenumber,
+                   lg._curr_time,
+                   lg._message_info);
+        }
+        void FlushLogToFile(const logmessage &lg)
+        {
+            std::ofstream out(_logfile, std::ios::app);
+            if (!out.is_open())
+            {
+                return;
+            }
+            char logtxt[2048];
+            snprintf(logtxt, sizeof(logtxt), "[%s][%d][%s][%d][%s] %s",
+                     lg._level.c_str(),
+                     lg._id,
+                     lg._filename.c_str(),
+                     lg._filenumber,
+                     lg._curr_time,
+                     lg._message_info);
+            out.write(logtxt, strlen(logtxt));
+            out.close();
+        }
+        void FlushLog(const logmessage &lg)
+        {
+            // 加过滤逻辑，可以把等级过滤出去
+            LockGuard lockguard(&glock);
+
+            switch (_type)
+            {
             case SCREEN_TYPE:
                 FlushLogToScreen(lg);
                 break;
             case FILE_TYPE:
                 FlushLogToFile(lg);
                 break;
+            }
         }
-    }
-    void LogMessage(std::string filename,int filenumber,int level,const char* format,...)  //介素可变参数
-    {
-        logmessage lg;
+        void LogMessage(std::string filename, int filenumber, int level, const char *format, ...) // 介素可变参数
+        {
+            logmessage lg;
 
-        lg._level = LevelToString(level);
-        lg._id = getpid();
-        lg._filename = filename;
-        lg._filenumber =filenumber;
-        lg._curr_time = GetCurTime();
+            lg._level = LevelToString(level);
+            lg._id = getpid();
+            lg._filename = filename;
+            lg._filenumber = filenumber;
+            lg._curr_time = GetCurTime();
 
-        va_list ap;
-        va_start(ap,format);    //初始化
-        
-        char log_info[1024];
-        vsnprintf(log_info,sizeof(log_info),format,ap);
+            va_list ap;
+            va_start(ap, format); // 初始化
 
-        va_end(ap);
-        lg._message_info = log_info;
+            char log_info[1024];
+            vsnprintf(log_info, sizeof(log_info), format, ap);
 
-        //打印出来日志
-        FlushLog(lg);
-    }
-    ~Log()
-    {
+            va_end(ap);
+            lg._message_info = log_info;
 
-    }
-private:
-    int _type;
-    std::string _logfile;
+            // 打印出来日志
+            FlushLog(lg);
+        }
+        ~Log()
+        {
+        }
+
+    private:
+        int _type;
+        std::string _logfile;
+    };
+
+#define LOG(level, Format, ...)                                          \
+    do                                                                   \
+    {                                                                    \
+        lg.logMessage(__FILE__, __LINE__, Level, Format, __VA_ARGS__);   \
+    } while (0)
+#define EnableScreen()              \
+    do                              \
+    {                               \
+        lg.EnableFILE(SCREEN_TYPE); \
+    } while (0)
+#define EnableFILE()          \
+    do                        \
+    {                         \
+        lg.Enable(FILE_TYPE); \
+    } while (0)
+
 };
