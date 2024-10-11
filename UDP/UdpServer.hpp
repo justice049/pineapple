@@ -16,8 +16,6 @@ static const int gsockfd = -1;
 enum
 {
     SOCKET_ERROR = 1
-    
-
 };
 
 
@@ -30,12 +28,14 @@ public:
     }
     void InitServer()
     {
+        //创建socket文件
         _sockfd = ::socket(AF_INET,SOCK_DGRAM,0);   //网络套接字，用户，协议类型
         if(_sockfd<0)
         {
             LOG(FATAL,"socket error\n");
             exit(SOCKET_ERROR);
         }
+        LOG(DEBUG,"socket create sucess,_sockfd:%d\n",_sockfd);     //当然是3，其实当013都不如4了让人刺激
     }
     void Start()
     {

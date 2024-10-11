@@ -9,23 +9,25 @@
 #include <cstring>
 #include "LockGuard.hpp"
 
+#ifndef LOG_HPP
+#define LOG_HPP
+
 #define SCREEN_TYPE 1
 #define FILE_TYPE 2
 
 const std::string glogfile = "./log.txt";
 pthread_mutex_t glock = PTHREAD_MUTEX_INITIALIZER;
 
-enum
-{
-    DEBUG = 1,
-    INFO,
-    WARNING,
-    ERRNO,
-    FATAL
-};
-
 namespace log_ns
 {
+    enum Level
+    {
+        DEBUG = 1,
+        INFO,
+        WARNING,
+        ERRNO,
+        FATAL
+    };
     std::string LevelToString(int level)
     {
         switch (level)
@@ -45,8 +47,6 @@ namespace log_ns
         }
     }
 
-    logmessage lg;
-
     std::string GetCurTime()
     {
         time_t now = time(nullptr);
@@ -65,32 +65,36 @@ namespace log_ns
     class logmessage
     {
     public:
-        std::string _level;
+        std::string _level;     //不是type
         pid_t _id;
         std::string _filename;
         int _filenumber;
         std::string _curr_time;
         std::string _message_info;
     };
+
+    //logmessage lg;
+
     class Log
     {
     public:
         Log(const std::string &logfile = glogfile) : _logfile(logfile), _type(SCREEN_TYPE)
         {
         }
-        static void Enable(int type)
+        //static        不用，我直接在类私有成员里定义实例
+        void Enable(int type)
         {
-            lg._type=type;                     //晕晕的，搞不懂,
+            _type=type;                   //晕晕的，搞不懂,
         }
         void FlushLogToScreen(const logmessage &lg)
         {
-            printf("[%s][%d][%s][%d][%s][%s]",
+            printf("[%s][%d][%s][%d][%s][%s]\n",
                    lg._level.c_str(),
                    lg._id,
                    lg._filename.c_str(),
                    lg._filenumber,
-                   lg._curr_time,
-                   lg._message_info);
+                   lg._curr_time.c_str(),
+                   lg._message_info.c_str());
         }
         void FlushLogToFile(const logmessage &lg)
         {
@@ -105,8 +109,8 @@ namespace log_ns
                      lg._id,
                      lg._filename.c_str(),
                      lg._filenumber,
-                     lg._curr_time,
-                     lg._message_info);
+                     lg._curr_time.c_str(),
+                     lg._message_info.c_str());
             out.write(logtxt, strlen(logtxt));
             out.close();
         }
@@ -154,12 +158,13 @@ namespace log_ns
     private:
         int _type;
         std::string _logfile;
-    };
+        logmessage lg;          //定义全局日志对象    
+};
 
-#define LOG(level, Format, ...)                                          \
-    do                                                                   \
-    {                                                                    \
-        lg.logMessage(__FILE__, __LINE__, Level, Format, __VA_ARGS__);   \
+#define LOG(level, Format, ...)                                        \
+    do                                                                 \
+    {                                                                  \
+        lg.LogMessage(__FILE__, __LINE__, level, Format, __VA_ARGS__); \
     } while (0)
 #define EnableScreen()              \
     do                              \
@@ -171,5 +176,6 @@ namespace log_ns
     {                         \
         lg.Enable(FILE_TYPE); \
     } while (0)
+    };
 
-};
+#endif //LOG_HPP
