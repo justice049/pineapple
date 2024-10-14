@@ -158,18 +158,19 @@ namespace log_ns
     private:
         int _type;
         std::string _logfile;
-        logmessage lg;          //定义全局日志对象    
 };
+
+Log lg;          //定义全局日志对象    
 
 #define LOG(level, Format, ...)                                        \
     do                                                                 \
     {                                                                  \
-        lg.LogMessage(__FILE__, __LINE__, level, Format, __VA_ARGS__); \
+        lg.LogMessage(__FILE__, __LINE__, level, Format, ##__VA_ARGS__); \
     } while (0)
 #define EnableScreen()              \
     do                              \
     {                               \
-        lg.EnableFILE(SCREEN_TYPE); \
+        lg.Enable(SCREEN_TYPE); \
     } while (0)
 #define EnableFILE()          \
     do                        \
