@@ -29,10 +29,11 @@ enum
 class UdpServer : public nocopy
 {
 public:
-    UdpServer(std::string localip,uint16_t localport = glocalport)
+    UdpServer(std::string &localip,uint16_t localport = glocalport)
     :_sockfd(gsockfd),
     _localport(localport),
-    _localip(localip)
+    _localip(localip),
+    _isrunning(false)
     {
 
     }
@@ -63,7 +64,20 @@ public:
     }
     void Start()
     {
-
+        _isrunning = true;
+        char inbuffer[1024];
+        while (_isrunning)
+        {
+            struct sockaddr_in peer;    //谁给我发的信息
+            socklen_t len = sizeof(peer);
+            ssize_t n = recvfrom(_sockfd,inbuffer,sizeof(inbuffer)-1,0,(struct sockaddr*)&peer,&len);
+            if(n>0)
+            {
+                //读到了，要发消息
+                
+            }
+        }
+        
     }
     ~UdpServer()
     {
@@ -73,4 +87,5 @@ private:
     int _sockfd;
     uint16_t _localport;
     std::string _localip;   //IP地址
+    bool _isrunning; 
 };
