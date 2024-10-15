@@ -74,14 +74,18 @@ public:
             if(n>0)
             {
                 //读到了，要发消息
-                
+                inbuffer[n]=0;
+                std::cout << "client say# " << inbuffer << std::endl;
+                std::string echo_string = "[udp_server echo]#";
+                echo_string += inbuffer;
+
+                sendto(_sockfd,echo_string.c_str(),echo_string.size(),0,(struct sockaddr *)&peer,len);
             }
         }
-        
     }
     ~UdpServer()
     {
-
+        if(_sockfd>gsockfd)::close(_sockfd);        //大于默认的就关闭了
     }
 private:
     int _sockfd;
