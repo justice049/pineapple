@@ -21,14 +21,18 @@ static const uint16_t glocalport = 8888;
 //让我们来枚举一些常量罢
 enum
 {
-    SOCKET_ERROR = 1
+    SOCKET_ERROR = 1,
+    BIND_ERROR
 };
 
-
+//UdpServer user("192.1.1.1",8899);
 class UdpServer : public nocopy
 {
 public:
-    UdpServer(uint16_t localport = glocalport):_sockfd(gsockfd),_localport(localport)
+    UdpServer(std::string localip,uint16_t localport = glocalport)
+    :_sockfd(gsockfd),
+    _localport(localport),
+    _localip(localip)
     {
 
     }
@@ -48,7 +52,14 @@ public:
         memset(&local,0,sizeof(local));
         local.sin_family = AF_INET;     //要和上面的一样
         local.sin_port = htons(_localport);        //主机序列转网络序列
-        local.sin_addr=
+        local.sin_addr.s_addr = inet_addr(_localip.c_str());            //需要四字节的IP  需要网络序列的IP，暂时的信号捏
+        int n = ::bind(_sockfd,(struct sockaddr*)&local,sizeof(local));
+        if(n<0)
+        {
+            LOG(FATAL,"bind error\n");
+            exit(BIND_ERROR);
+        }
+        LOG(DEBUG,"socket bind success\n");
     }
     void Start()
     {

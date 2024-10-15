@@ -65,7 +65,7 @@ namespace log_ns
     class logmessage
     {
     public:
-        std::string _level;     //不是type
+        std::string _level; // 不是type
         pid_t _id;
         std::string _filename;
         int _filenumber;
@@ -73,7 +73,7 @@ namespace log_ns
         std::string _message_info;
     };
 
-    //logmessage lg;
+    // logmessage lg;
 
     class Log
     {
@@ -81,10 +81,10 @@ namespace log_ns
         Log(const std::string &logfile = glogfile) : _logfile(logfile), _type(SCREEN_TYPE)
         {
         }
-        //static        不用，我直接在类私有成员里定义实例
+        // static        不用，我直接在类私有成员里定义实例
         void Enable(int type)
         {
-            _type=type;                   //晕晕的，搞不懂,
+            _type = type; // 晕晕的，搞不懂,
         }
         void FlushLogToScreen(const logmessage &lg)
         {
@@ -158,18 +158,18 @@ namespace log_ns
     private:
         int _type;
         std::string _logfile;
-};
+    };
 
-Log lg;          //定义全局日志对象    
+    Log lg; // 定义全局日志对象
 
-#define LOG(level, Format, ...)                                        \
-    do                                                                 \
-    {                                                                  \
+#define LOG(level, Format, ...)                                          \
+    do                                                                   \
+    {                                                                    \
         lg.LogMessage(__FILE__, __LINE__, level, Format, ##__VA_ARGS__); \
     } while (0)
-#define EnableScreen()              \
-    do                              \
-    {                               \
+#define EnableScreen()          \
+    do                          \
+    {                           \
         lg.Enable(SCREEN_TYPE); \
     } while (0)
 #define EnableFILE()          \
@@ -177,6 +177,6 @@ Log lg;          //定义全局日志对象
     {                         \
         lg.Enable(FILE_TYPE); \
     } while (0)
-    };
+};
 
-#endif //LOG_HPP
+#endif // LOG_HPP
