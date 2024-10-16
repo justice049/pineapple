@@ -1,0 +1,15 @@
+Apple：苹果  
+Book：书  
+Cat：猫  
+Dog：狗  
+Egg：鸡蛋  
+Fish：鱼  
+House：房子  
+Ice cream：冰淇淋  
+Juice：果汁  
+Kite：风筝  
+Hello：你好  
+Goodbye：再见  
+Please：请  
+Thank you：谢谢  
+Sorry：对不起  
