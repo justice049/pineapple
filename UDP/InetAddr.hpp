@@ -28,17 +28,12 @@ public:
     {
         return _port;
     }
-    ~InetAddr();
+    ~InetAddr()
+    {
+        //析构呵呵
+    }
 private:
     std::string _ip;
     uint16_t _port;
     struct sockaddr_in _addr;   //不确定以后要什么格式的，先预设着到时候也好转
 };
-
-InetAddr::InetAddr(/* args */)
-{
-}
-
-InetAddr::~InetAddr()
-{
-}

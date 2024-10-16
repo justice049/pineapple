@@ -4,7 +4,7 @@
 using namespace log_ns;
 
 //./udp_server local-ip local-port
-//./udp_server 127.0.0.1 8888lll
+//./udp_server 127.0.0.1 8888
 int main(int argc,char *argv[])
 {
     if(argc != 2 )

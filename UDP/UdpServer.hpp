@@ -27,16 +27,16 @@ enum
 };
 
 // UdpServer user("192.1.1.1",8899);
-using func_t = std::function<std::string(std::string &)>;     //新建一个模板
+//using func_t = std::function<std::string(std::string &)>;     //新建一个模板
 
 // 服务器大多用于进行IO，要进行适当的解耦
 
 class UdpServer : public nocopy
 {
 public:
-    UdpServer(func_t func, uint16_t localport = glocalport)
-        : _func(func),
-          _sockfd(gsockfd),
+    UdpServer(uint16_t localport = glocalport)
+        : _sockfd(gsockfd),
+          //_localip(localip);
           _localport(localport),
           _isrunning(false)
     {
@@ -58,7 +58,7 @@ public:
         local.sin_family = AF_INET;         // 要和上面的一样
         local.sin_port = htons(_localport); // 主机序列转网络序列
 
-        // local.sin_addr.s_addr = inet_addr(_localip.c_str());            //需要四字节的IP  需要网络序列的IP，暂时的信号捏
+        //local.sin_addr.s_addr = inet_addr(_localip.c_str());            //需要四字节的IP  需要网络序列的IP，暂时的信号捏
 
         local.sin_addr.s_addr = INADDR_ANY; // 建议写成INADDR_ANY,就是服务器端进行任意IP地址绑定
 
@@ -102,7 +102,7 @@ public:
 private:
     int _sockfd;
     uint16_t _localport;
-    // std::string _localip;   //IP地址
+    //std::string _localip;   //IP地址
     bool _isrunning;
-    func_t _func;
+    //func_t _func;
 };
