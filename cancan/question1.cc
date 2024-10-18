@@ -8,6 +8,7 @@ public:
 		std::cout << "下一秒我在台北看烟火" << std::endl;
 	}
 };
+
 int main()
 {
 	F1 f1;

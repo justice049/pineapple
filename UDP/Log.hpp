@@ -10,6 +10,7 @@
 #include "LockGuard.hpp"
 
 #ifndef LOG_HPP
+
 #define LOG_HPP
 
 #define SCREEN_TYPE 1
