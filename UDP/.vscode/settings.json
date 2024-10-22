@@ -48,5 +48,6 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "backgroundCover.opacity": 0.3
 }
